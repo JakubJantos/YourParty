@@ -1,17 +1,16 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: kuba
-  Date: 2019-08-03
-  Time: 10:42
-  To change this template use File | Settings | File Templates.
---%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
     <title>Title</title>
 </head>
 <body>
-<form method="post" action="registration.jsp">
+
+<c:if test="${ERROR != null}">
+    <div style="background-color: red;">${ERROR}</div>
+
+</c:if>
+<form method="post" action="registration">
     <label>Login: </label>
     <input type="text" name="login" />
     <label>E-mail: </label>
@@ -22,5 +21,11 @@
 
 </form>
 
+<c:forEach var="user" items="${users}">
+    <div>${user.mail} ${user.login}</div>
+</c:forEach>
+<c:if test="${register == true}">
+    <p style="color:green;">register sukces</p>
+</c:if>
 </body>
 </html>
