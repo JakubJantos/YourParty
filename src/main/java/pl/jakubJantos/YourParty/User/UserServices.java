@@ -3,6 +3,7 @@ package pl.jakubJantos.YourParty.User;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserServices {
@@ -29,13 +30,15 @@ public class UserServices {
     }
 
     //system logowania
-    public boolean login(String login, String password) {
-        boolean loginUser = userRepository.findAll().stream()
-                .anyMatch(u -> u.getLogin().equals(login) & u.getPassword().equals(password));
-        if (!loginUser) {
+    public User login(String login, String password) {
+        Optional<User> loginUser = userRepository.findAll().stream()
+                .filter(u -> u.getLogin().equals(login) & u.getPassword().equals(password))
+                .findFirst();
+        if (!loginUser.isPresent()) {
             throw new RuntimeException("wrong login or password");
         }
-        return loginUser;
+
+        return loginUser.get();
 
 
     }

@@ -1,5 +1,7 @@
 package pl.jakubJantos.YourParty.Events;
 
+import pl.jakubJantos.YourParty.User.User;
+
 import javax.persistence.*;
 import java.time.LocalDate;
 
@@ -12,17 +14,19 @@ public class Events {
     private String localization;
     private LocalDate eventDate;
     private String eventStatus;
-//    @ManyToOne
-    private Long userId;
+
+    @ManyToOne
+    private User user;
 
     public Events() {
     }
 
-    public Events(String name, String localization, LocalDate eventDate, String eventStatus) {
+    public Events(String name, String localization, LocalDate eventDate, String eventStatus, User user) {
         this.name = name;
         this.localization = localization;
         this.eventDate = eventDate;
         this.eventStatus = eventStatus;
+        this.user = user;
     }
 
     public Long getId() {
@@ -65,11 +69,12 @@ public class Events {
         this.eventStatus = eventStatus;
     }
 
-    public Long getUserId() {
-        return userId;
+    public User getUser() {
+        return user;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setUser(User user) {
+        this.user = user;
     }
+
 }

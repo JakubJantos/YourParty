@@ -2,20 +2,23 @@ package pl.jakubJantos.YourParty.User;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import pl.jakubJantos.YourParty.Events.EventsRepository;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @Controller
 public class UserControler {
 
     private final UserServices userServices;
+    private final EventsRepository eventsRepository;
+    private final UserRepository userRepository;
 
-    public UserControler(UserServices userServices) {
+    public UserControler(UserServices userServices, EventsRepository eventsRepository, UserRepository userRepository) {
         this.userServices = userServices;
+        this.eventsRepository = eventsRepository;
+        this.userRepository = userRepository;
     }
 
     @GetMapping("/registration")
@@ -31,35 +34,57 @@ public class UserControler {
 
             boolean reg = userServices.register(mail, login, password);
             model.addAttribute("register", reg);
-            List<User> users = userServices.findAll();
-            model.addAttribute("users", users);
+
 
             return "user/registration";
-        }catch (Exception ex){
+        } catch (Exception ex) {
             model.addAttribute("ERROR", ex.getLocalizedMessage());
             return "user/registration";
         }
     }
 
     @GetMapping("/login")
-    public String loginForm(){
+    public String loginForm() {
         return "user/login";
     }
 
 
     @PostMapping("/login")
-    public String login(@RequestParam String login, @RequestParam String password, Model model) {
+    public String login(@RequestParam String login, @RequestParam String password, Model model, HttpServletRequest request) {
         try {
 
 
-            boolean log = userServices.login(login, password);
-            model.addAttribute("login", log);
+            User loggedUser = userServices.login(login, password);
+            request.getSession().setAttribute("principalId", loggedUser.getId());
 
-            return "user/controlPanel";
 
-        }catch (Exception ex){
+            return "redirect:/controlPanel/" + loggedUser.getId();
+
+        } catch (Exception ex) {
             model.addAttribute("badLogin", ex.getLocalizedMessage());
             return "user/login";
         }
+    }
+
+    @GetMapping("/controlPanel/{id}")
+    public String controlPanel(@PathVariable Long id, Model model) {
+
+        model.addAttribute("userId", id);
+        model.addAttribute("eventsL", eventsRepository.findByUserId(id));
+
+        return "user/controlPanel";
+    }
+
+    @GetMapping("/listUsers")
+    public String listUsers( Model model, @SessionAttribute Long principalId){
+
+        if(principalId == null){
+            throw new IllegalStateException("Access denied");
+        }
+
+        List<User> users = userServices.findAll();
+        model.addAttribute("users", users);
+        model.addAttribute("user", userRepository.findById(principalId));
+        return "user/listUsers";
     }
 }
